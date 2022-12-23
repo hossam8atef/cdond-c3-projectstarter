@@ -187,6 +187,29 @@ jobs:
       - destroy-environment:
          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
+  run-migrations:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            cat .env
+            npm i
+            npm run migrations
+      - run:
+          name: Send migration results to kvdb
+          command: |
+           if grep -q "has been executed successfully." ./backend/migrations_dump.txt
+           then
+           # bucket id created from curl -d 'email=your-email-ID@domain.com' https://kvdb.io
+           curl https://kvdb.io/9QYu1AzEtPnLKeZ3vG66Qb/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+           fi
+
 workflows:
   default:
     jobs:
@@ -207,3 +230,5 @@ workflows:
               only: [master]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
