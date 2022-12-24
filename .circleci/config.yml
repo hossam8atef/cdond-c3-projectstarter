@@ -17,23 +17,24 @@ commands:
              aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
 
   revert-migrations:
-    description: Revert the last migration if successfully run in the current workflow.
+    description: Revert the last migration
     parameters:
-      # Add parameter here     
+      workflow_id:
+        type: string      
     steps:
-      - run:
-          name: Revert migrations
-          # Add when this will run
-          command: |
-            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
-            if(( $SUCCESS==1 )); 
-            then
-            #  cd ~/project/backend
-            #  npm install
-            #  Add revert code here. You can find this in the Getting Started section.
-              exit 1
-            fi
+        - run:
+            name: Revert migrations
+            when: on_fail
+            command: |
+                # Example: kvdb.io
+                SUCCESS=$(curl --insecure  https://kvdb.io/NinMn2hq2guBw3hAe6gGU7/migration_<< parameters.workflow_id >>)
+                # Logic for reverting the database state
+                if (( $SUCCESS == 1 ));
+                then
+                    cd ~/project/backend
+                    npm install
+                    npm run migration:revert
+                fi  
             
 jobs:
   build-frontend:
@@ -311,11 +312,14 @@ jobs:
             if curl -s ${URL} | grep "Welcome"
             then
                 # Change this to 0 after the job fails
-              return 0
+              return 1
             else
               return 1
             fi
-
+      - destroy-environment:
+          workflow_id: f6231be
+      - revert-migrations:
+          workflow_id: f6231be         
 workflows:
   default:
     jobs:
