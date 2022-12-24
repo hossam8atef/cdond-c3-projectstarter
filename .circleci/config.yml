@@ -207,7 +207,7 @@ jobs:
            if grep -q "has been executed successfully." ./backend/migrations_dump.txt
            then
            # bucket id created from curl -d 'email=your-email-ID@domain.com' https://kvdb.io
-           curl https://kvdb.io/9QYu1AzEtPnLKeZ3vG66Qb/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+           curl https://kvdb.io/NinMn2hq2guBw3hAe6gGU7/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
            fi
 
   deploy-frontend:
@@ -332,7 +332,7 @@ jobs:
             export OldWorkflowID=$(aws cloudformation \
                     list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
                     --no-paginate --output text| cut -d '-' -f 2)
-            curl https://kvdb.io/9QYu1AzEtPnLKeZ3vG66Qb/OldWorkflowID_${CIRCLE_WORKFLOW_ID:0:7}  -d "${OldWorkflowID}"        
+            curl https://kvdb.io/NinMn2hq2guBw3hAe6gGU7/OldWorkflowID_${CIRCLE_WORKFLOW_ID:0:7}  -d "${OldWorkflowID}"        
             aws cloudformation deploy \
             --template-file .circleci/files/cloudfront.yml \
             --stack-name udapeople-cloudfront \
